@@ -1,4 +1,6 @@
-module.exports = {
+import type { NextConfig } from 'next'
+
+const nextConfig: NextConfig = {
   async headers() {
     return [
       {
@@ -6,10 +8,12 @@ module.exports = {
         headers: [
           {
             key: 'Content-Type',
-            value: 'application/json'
-          }
-        ]
-      }
+            value: 'application/json',
+          },
+        ],
+      },
     ]
-  }
+  },
 }
+
+export default nextConfig
