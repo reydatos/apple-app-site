@@ -1,11 +1,15 @@
 {
-  "applinks": {
-    "apps": [],
-    "details": [
-      {
-        "appID": "55ZKQ7L9JL.com.revolv.app.clip",
-        "paths": [ "/appclip/*" ]
-      }
-    ]
-  }
+    "appclips": {
+        "apps": ["55ZKQ7L9JL.com.revolv.app.clip"]
+    },
+    "applinks": {
+        "apps": [],
+        "details": [{
+            "appID": "55ZKQ7L9JL.com.revolv.app.clip",
+            "paths": ["/profile/create", "/profile/view"]
+        }]
+    },
+    "webcredentials": {
+        "apps": ["55ZKQ7L9JL.com.revolv.app.clip"]
+    }
 }
