@@ -6,7 +6,13 @@
         "apps": [],
         "details": [{
             "appID": "55ZKQ7L9JL.com.revolv.app.clip",
-            "paths": ["/profile/create", "/profile/view"]
+            "paths": [
+                "/app/profile/create",
+                "/app/profile/view/*",
+                "/app/meeting/prep/*",
+                "NOT /app/admin/*",
+                "NOT /app/internal/*"
+            ]
         }]
     },
     "webcredentials": {
