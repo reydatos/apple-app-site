@@ -1,11 +1,11 @@
 {
     "appclips": {
-        "apps": ["55ZKQ7L9JL.com.a8media.revolv.appclip"]
+        "apps": ["55ZKQ7L9JL.com.a8media.revolv.app"]
     },
     "applinks": {
         "apps": [],
         "details": [{
-            "appID": "55ZKQ7L9JL.com.a8media.revolv.appclip",
+            "appID": "55ZKQ7L9JL.com.a8media.revolv.app",
             "paths": [
                 "/app/profile/create",
                 "/app/profile/view/*",
@@ -16,6 +16,6 @@
         }]
     },
     "webcredentials": {
-        "apps": ["55ZKQ7L9JL.com.a8media.revolv.appclip"]
+        "apps": ["55ZKQ7L9JL.com.a8media.revolv.app"]
     }
 }
