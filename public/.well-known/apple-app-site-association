@@ -11,6 +11,8 @@
           "/app/profile/create",
           "/app/profile/view/*",
           "/app/meeting/prep/*",
+          "/ampd/*",
+          "/event/*",
           "NOT /app/admin/*",
           "NOT /app/internal/*"
         ]
