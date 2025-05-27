@@ -5,7 +5,7 @@
   "applinks": {
     "details": [
       {
-        "appID": "55ZKQ7L9JL.com.a8media.revolv.appclip",
+        "appID": "55ZKQ7L9JL.com.a8media.revolv.app",
         "paths": [
           "/appclip/test-launch",
           "/app/profile/create",
@@ -17,9 +17,8 @@
       }
     ]
   },
-  "webcredentials": {
+ "webcredentials": {
     "apps": [
-      "55ZKQ7L9JL.com.a8media.revolv.appclip",
       "55ZKQ7L9JL.com.a8media.revolv.app"
     ]
   }
