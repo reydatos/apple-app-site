@@ -30,5 +30,3 @@
       </>
     );
   }
-
-  (Removed the indented duplicate code and extra spaces)
