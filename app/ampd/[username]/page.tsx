@@ -1,30 +1,38 @@
-"use client";
+ "use client";
   import { useEffect, useState } from 'react';
   import Head from 'next/head';
 
-  export default function EventPage({ params }: { params: { eventId: string } }) {
-    const [event, setEvent] = useState(null);
+  export default function ProfilePage({ params }: { params: Promise<{ username: string }> }) {
+    const [profile, setProfile] = useState(null);
+    const [username, setUsername] = useState<string>('');
 
     useEffect(() => {
-      fetch(`https://api.revolv.app/v1/events/${params.eventId}`)
-        .then(res => res.json())
-        .then(setEvent);
-    }, [params.eventId]);
+      const getParams = async () => {
+        const resolvedParams = await params;
+        setUsername(resolvedParams.username);
+
+        fetch(`https://api.revolv.app/v1/profiles/${resolvedParams.username}`)
+          .then(res => res.json())
+          .then(setProfile);
+      };
+
+      getParams();
+    }, [params]);
 
     return (
       <>
         <Head>
           <meta name="apple-itunes-app" content="app-clip-bundle-id=com.a8media.revolv.appclip" />
-          <title>Event: {params.eventId}</title>
+          <title>Profile: {username}</title>
         </Head>
         <main style={{ padding: '2rem', textAlign: 'center' }}>
-          {event ? (
+          {profile ? (
             <>
-              <h1>Welcome to {event.name}</h1>
-              <p>{event.description}</p>
+              <h1>Welcome to {profile.name}</h1>
+              <p>{profile.bio}</p>
             </>
           ) : (
-            <p>Loading event...</p>
+            <p>Loading profile...</p>
           )}
         </main>
       </>
