@@ -1,27 +1,59 @@
 {
-  "appclips": {
-    "apps": ["55ZKQ7L9JL.com.a8media.revolv.appclip"]
-  },
   "applinks": {
     "details": [
       {
-        "appID": "55ZKQ7L9JL.com.a8media.revolv.app",
-        "paths": [
-          "/appclip/test-launch",
-          "/app/profile/create",
-          "/app/profile/view/*",
-          "/app/meeting/prep/*",
-          "/ampd/*",
-          "/event/*",
-          "NOT /app/admin/*",
-          "NOT /app/internal/*"
+        "appIDs": ["55ZKQ7L9JL.com.a8media.revolv"],
+        "components": [
+          {
+            "/": "/connect*",
+            "comment": "Matches connection URLs like /connect?inviter=John"
+          },
+          {
+            "/": "/profile/*", 
+            "comment": "Matches profile URLs like /profile/username"
+          },
+          {
+            "/": "/event/*",
+            "comment": "Matches event URLs like /event/123"  
+          },
+          {
+            "/": "/c*",
+            "comment": "Matches shortened URLs like /c?i=John&s=qr"
+          },
+          {
+            "/": "/ampd/*",
+            "comment": "Legacy: Profile sharing via QR codes"
+          },
+          {
+            "/": "/create",
+            "comment": "Legacy: Profile creation flow"
+          }
+        ]
+      },
+      {
+        "appIDs": ["55ZKQ7L9JL.com.a8media.revolv.clip"],
+        "components": [
+          {
+            "/": "/connect*",
+            "comment": "App Clip: Matches connection URLs like /connect?inviter=John"
+          },
+          {
+            "/": "/c*", 
+            "comment": "App Clip: Matches shortened URLs like /c?i=John&s=qr"
+          },
+          {
+            "/": "/ampd/*",
+            "comment": "App Clip Legacy: Profile sharing via QR codes"
+          },
+          {
+            "/": "/create",
+            "comment": "App Clip Legacy: Profile creation flow"
+          }
         ]
       }
     ]
   },
- "webcredentials": {
-    "apps": [
-      "55ZKQ7L9JL.com.a8media.revolv.app"
-    ]
+  "webcredentials": {
+    "apps": ["55ZKQ7L9JL.com.a8media.revolv"]
   }
 }
