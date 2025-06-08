@@ -1,3 +1,11 @@
+ "use client";
+  import { useEffect, useState } from 'react';
+  import Head from 'next/head';
+
+  export default function ProfilePage({ params }: { params: { username: string } }) {
+    // rest of component...
+  }
+
 import { useEffect, useState } from 'react';
 import Head from 'next/head';
 
