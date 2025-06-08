@@ -1,59 +1,55 @@
 {
-    "applinks": {
-      "details": [
-        {
-          "appIDs": ["55ZKQ7L9JL.com.a8media.revolv"],
-          "components": [
-            {
-              "/": "/connect*",
-              "comment": "Matches connection URLs like /connect?inviter=John"
-            },
-            {
-              "/": "/profile/*",
-              "comment": "Matches profile URLs like /profile/username"
-            },
-            {
-              "/": "/event/*",
-              "comment": "Matches event URLs like /event/123"
-            },
-            {
-              "/": "/c*",
-              "comment": "Matches shortened URLs like /c?i=John&s=qr"
-            },
-            {
-              "/": "/ampd/*",
-              "comment": "Legacy: Profile sharing via QR codes"
-            },
-            {
-              "/": "/create",
-              "comment": "Legacy: Profile creation flow"
-            }
-          ]
-        },
-        {
-          "appIDs": ["55ZKQ7L9JL.com.a8media.revolv.clip"],
-          "components": [
-            {
-              "/": "/connect*",
-              "comment": "App Clip: Matches connection URLs like /connect?inviter=John"
-            },
-            {
-              "/": "/c*",
-              "comment": "App Clip: Matches shortened URLs like /c?i=John&s=qr"
-            },
-            {
-              "/": "/ampd/*",
-              "comment": "App Clip Legacy: Profile sharing via QR codes"
-            },
-            {
-              "/": "/create",
-              "comment": "App Clip Legacy: Profile creation flow"
-            }
-          ]
-        }
-      ]
-    },
-    "webcredentials": {
-      "apps": ["55ZKQ7L9JL.com.a8media.revolv"]
-    }
+  "applinks": {
+    "details": [
+      {
+        "appIDs": ["55ZKQ7L9JL.com.a8media.revolv"],
+        "components": [
+          {
+            "/": "/profile/*",
+            "comment": "Profile vanity URLs like /profile/username"
+          },
+          {
+            "/": "/connect*",
+            "comment": "Connection URLs like /connect?inviter=John"
+          },
+          {
+            "/": "/event/*",
+            "comment": "Event URLs like /event/123"
+          },
+          {
+            "/": "/ampd/*",
+            "comment": "Legacy: Profile sharing via QR codes"
+          },
+          {
+            "/": "/create",
+            "comment": "Legacy: Profile creation flow"
+          }
+        ]
+      },
+      {
+        "appIDs": ["55ZKQ7L9JL.com.a8media.revolv.clip"],
+        "components": [
+          {
+            "/": "/profile/*",
+            "comment": "App Clip: Profile vanity URLs"
+          },
+          {
+            "/": "/connect*",
+            "comment": "App Clip: Connection URLs"
+          },
+          {
+            "/": "/ampd/*",
+            "comment": "App Clip Legacy: Profile sharing"
+          },
+          {
+            "/": "/create",
+            "comment": "App Clip Legacy: Profile creation"
+          }
+        ]
+      }
+    ]
+  },
+  "webcredentials": {
+    "apps": ["55ZKQ7L9JL.com.a8media.revolv"]
   }
+}
