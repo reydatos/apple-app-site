@@ -31,29 +31,6 @@
           flexDirection: 'column',
           fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
         }}>
-          {/* Header with Revolv Logo */}
-          <header style={{
-            background: 'white',
-            borderBottom: '1px solid #E5E5E5',
-            padding: '16px 24px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center'
-          }}>
-            <svg width="150" height="40" viewBox="0 0 320 80" fill="none">
-              <g transform="translate(0, 10)">
-                <path d="M10 20 L10 10 L20 10" stroke="#FF3B30" strokeWidth="4" fill="none"/>
-                <path d="M60 10 L70 10 L70 20" stroke="#FF3B30" strokeWidth="4" fill="none"/>
-                <path d="M70 50 L70 60 L60 60" stroke="#FF3B30" strokeWidth="4" fill="none"/>
-                <path d="M20 60 L10 60 L10 50" stroke="#FF3B30" strokeWidth="4" fill="none"/>
-                <path d="M25 35 L40 20 L55 35 L40 50 Z" fill="#FF3B30"/>
-                <circle cx="40" cy="35" r="8" fill="white"/>
-              </g>
-              <text x="90" y="48" fontFamily="Arial, sans-serif" fontSize="48" fontWeight="600" 
-  fill="#2C2C2C">revolv</text>
-            </svg>
-          </header>
-
           {/* Profile Content */}
           <div style={{
             flex: 1,
