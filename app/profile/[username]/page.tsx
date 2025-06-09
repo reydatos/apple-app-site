@@ -4,18 +4,41 @@
 
   export default function ProfilePage({ params }: { params: Promise<{ username: string }> }) {
     const [username, setUsername] = useState<string>('');
+    const [profileData, setProfileData] = useState<any>(null);
 
     useEffect(() => {
       const getParams = async () => {
         const resolvedParams = await params;
         setUsername(resolvedParams.username);
+
+        // Fetch profile data
+        try {
+          const response = await fetch(
+
+  `${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/profiles?username=eq.${resolvedParams.username}`,
+            {
+              headers: {
+                'apikey': process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+                'Authorization': `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY}`,
+                'Content-Type': 'application/json'
+              }
+            }
+          );
+
+          if (response.ok) {
+            const data = await response.json();
+            setProfileData(data[0] || null);
+          }
+        } catch (error) {
+          console.error('Error fetching profile:', error);
+        }
       };
       getParams();
     }, [params]);
 
-    const displayName = username;
-    const initials = displayName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) ||
-  username.charAt(0).toUpperCase();
+    const displayName = profileData?.full_name || username;
+    const initials = displayName.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2) ||
+      username.charAt(0).toUpperCase();
 
     return (
       <>
