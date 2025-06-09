@@ -2,7 +2,6 @@
   import { useEffect, useState } from 'react';
   import Head from 'next/head';
 
-  // Types for better type safety
   interface ProfileData {
     id: string;
     full_name: string;
@@ -24,17 +23,13 @@
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    // Input validation function
     const isValidUsername = (username: string): boolean => {
-      // Username should be 3-30 characters, alphanumeric, 
-  underscore, hyphen only
       const usernameRegex = /^[a-zA-Z0-9_-]{3,30}$/;
       return usernameRegex.test(username);
     };
 
-    // Sanitize string to prevent XSS
     const sanitizeString = (str: string): string => {
-      return str.replace(/[<>\"'&]/g, (match) => {
+      return str.replace(/[<>"'&]/g, (match) => {
         const escapeMap: { [key: string]: string } = {
           '<': '&lt;',
           '>': '&gt;',
@@ -46,11 +41,9 @@
       });
     };
 
-    // Secure API call with proper error handling
     const fetchProfileData = async (username: string):
   Promise<ApiResponse> => {
       try {
-        // Validate environment variables exist
         const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
         const supabaseKey =
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -60,14 +53,13 @@
   configuration');
         }
 
-        // Input validation
         if (!isValidUsername(username)) {
           throw new Error('Invalid username format');
         }
 
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(),
-  10000); // 10s timeout
+  10000);
 
         const response = await fetch(
           `${supabaseUrl}/rest/v1/profiles?username=eq.${encodeURICom
@@ -87,20 +79,17 @@
         clearTimeout(timeoutId);
 
         if (!response.ok) {
-          // Don't expose internal error details to client
           throw new Error('Failed to fetch profile data');
         }
 
         const data = await response.json();
 
-        // Validate response structure
         if (!Array.isArray(data)) {
           throw new Error('Invalid response format');
         }
 
         const profile = data[0] || null;
 
-        // Validate profile data structure if it exists
         if (profile && (!profile.id || !profile.username)) {
           throw new Error('Invalid profile data structure');
         }
@@ -110,8 +99,6 @@
       } catch (error) {
         console.error('Profile fetch error:', error);
 
-        // Return user-friendly error messages, don't expose internal
-   details
         if (error instanceof Error) {
           if (error.name === 'AbortError') {
             return { data: null, error: 'Request timeout' };
@@ -157,7 +144,6 @@
       getParams();
     }, [params]);
 
-    // Compute display values with sanitization
     const displayName = profileData?.full_name
       ? sanitizeString(profileData.full_name)
       : sanitizeString(username);
@@ -173,7 +159,6 @@
       .toUpperCase()
       .slice(0, 2) || sanitizedUsername.charAt(0).toUpperCase();
 
-    // Handle loading and error states
     if (isLoading) {
       return (
         <div style={{ 
@@ -204,7 +189,7 @@
     }
 
     return (
-      <>
+      <div>
         <Head>
           <title>{displayName} - Revolv Profile</title>
           <meta name="description" content={`Connect with 
@@ -212,15 +197,11 @@
   and build your professional network.`} />
           <meta name="viewport" content="width=device-width, 
   initial-scale=1" />
-
-          {/* Security headers */}
           <meta httpEquiv="X-Content-Type-Options" content="nosniff" 
   />
           <meta httpEquiv="X-Frame-Options" content="DENY" />
           <meta httpEquiv="X-XSS-Protection" content="1; mode=block" 
   />
-
-          {/* Open Graph Meta Tags */}
           <meta property="og:type" content="profile" />
           <meta property="og:title" content={`${displayName} - Revolv
    Profile`} />
@@ -234,8 +215,6 @@
           <meta property="og:image:width" content="1200" />
           <meta property="og:image:height" content="630" />
           <meta property="og:site_name" content="Revolv" />
-
-          {/* Twitter Card Meta Tags */}
           <meta name="twitter:card" content="summary_large_image" />
           <meta name="twitter:title" content={`${displayName} - 
   Revolv Profile`} />
@@ -244,11 +223,10 @@
   and build your professional network.`} />
           <meta name="twitter:image" 
   content="https://getrevolv.com/revolv-og-image.png" />
-
-          {/* Apple App Banner */}
           <meta name="apple-itunes-app" 
   content="app-clip-bundle-id=com.a8media.revolv.clip" />
         </Head>
+
         <main style={{ 
           minHeight: '100vh',
           background: '#FAFAFA',
@@ -411,6 +389,6 @@
             </div>
           </div>
         </main>
-      </>
+      </div>
     );
   }
