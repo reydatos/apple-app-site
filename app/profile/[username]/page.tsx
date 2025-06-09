@@ -1,5 +1,4 @@
   import { Metadata } from 'next';
-  import ProfileClient from './ProfileClient';
 
   interface Props {
     params: Promise<{ username: string }>;
@@ -10,10 +9,7 @@
   Promise<Metadata> {
     const resolvedParams = await params;
     const username = resolvedParams.username;
-
-    // Optionally fetch profile data here for more accurate meta tags
-    const displayName = username; // You could fetch actual name from
-   DB here
+    const displayName = username;
 
     return {
       title: `${displayName} - Revolv Profile`,
@@ -54,177 +50,12 @@
 
   export default async function ProfilePage({ params }: Props) {
     const resolvedParams = await params;
-    return <ProfileClient username={resolvedParams.username} />;
-  }
+    const username = resolvedParams.username;
 
-  Then create a separate client component file ProfileClient.tsx:
-
-  "use client";
-  import { useEffect, useState } from 'react';
-
-  interface ProfileData {
-    id: string;
-    full_name: string;
-    username: string;
-    bio?: string;
-    created_at: string;
-  }
-
-  interface ProfileClientProps {
-    username: string;
-  }
-
-  export default function ProfileClient({ username }: 
-  ProfileClientProps) {
-    const [profileData, setProfileData] = useState<ProfileData |
-  null>(null);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-
-    const isValidUsername = (username: string): boolean => {
-      const usernameRegex = /^[a-zA-Z0-9_-]{3,30}$/;
-      return usernameRegex.test(username);
-    };
-
-    const sanitizeString = (str: string): string => {
-      return str.replace(/[<>"'&]/g, (match) => {
-        const escapeMap: { [key: string]: string } = {
-          '<': '&lt;',
-          '>': '&gt;',
-          '"': '&quot;',
-          "'": '&#39;',
-          '&': '&amp;'
-        };
-        return escapeMap[match];
-      });
-    };
-
-    useEffect(() => {
-      const fetchProfileData = async () => {
-        try {
-          const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-          const supabaseKey =
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-          if (!supabaseUrl || !supabaseKey) {
-            throw new Error('Missing required environment 
-  configuration');
-          }
-
-          if (!isValidUsername(username)) {
-            throw new Error('Invalid username format');
-          }
-
-          const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(),
-  10000);
-
-          const response = await fetch(
-            `${supabaseUrl}/rest/v1/profiles?username=eq.${encodeURIC
-  omponent(username)}&select=id,full_name,username,bio,created_at`,
-            {
-              method: 'GET',
-              headers: {
-                'apikey': supabaseKey,
-                'Authorization': `Bearer ${supabaseKey}`,
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-              },
-              signal: controller.signal
-            }
-          );
-
-          clearTimeout(timeoutId);
-
-          if (!response.ok) {
-            throw new Error('Failed to fetch profile data');
-          }
-
-          const data = await response.json();
-
-          if (!Array.isArray(data)) {
-            throw new Error('Invalid response format');
-          }
-
-          const profile = data[0] || null;
-          setProfileData(profile);
-
-        } catch (error) {
-          console.error('Profile fetch error:', error);
-          setError('Unable to load profile');
-        } finally {
-          setIsLoading(false);
-        }
-      };
-
-      fetchProfileData();
-    }, [username]);
-
-    const displayName = profileData?.full_name
-      ? sanitizeString(profileData.full_name)
-      : sanitizeString(username);
-
-    const sanitizedUsername = sanitizeString(username);
-    const sanitizedBio = profileData?.bio ?
-  sanitizeString(profileData.bio) : null;
-
-    const initials = displayName
-      .split(' ')
-      .map(n => n[0])
-      .join('')
-      .toUpperCase()
-      .slice(0, 2) || sanitizedUsername.charAt(0).toUpperCase();
-
-    if (isLoading) {
-      return (
-        <div style={{ 
-          minHeight: '100vh', 
-          display: 'flex', 
-          alignItems: 'center', 
-          justifyContent: 'center',
-          fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI",
-   Roboto, sans-serif'
-        }}>
-          <div style={{ textAlign: 'center' }}>
-            <div style={{
-              width: '40px',
-              height: '40px',
-              border: '4px solid #f3f3f3',
-              borderTop: '4px solid #FF3B30',
-              borderRadius: '50%',
-              animation: 'spin 1s linear infinite',
-              margin: '0 auto 16px'
-            }}></div>
-            <p style={{ color: '#666', fontSize: '16px' }}>Loading
-  profile...</p>
-          </div>
-        </div>
-      );
-    }
-
-    if (error) {
-      return (
-        <div style={{ 
-          minHeight: '100vh', 
-          display: 'flex', 
-          alignItems: 'center', 
-          justifyContent: 'center',
-          fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI",
-   Roboto, sans-serif'
-        }}>
-          <div style={{ textAlign: 'center', maxWidth: '400px', 
-  padding: '40px 20px' }}>
-            <h1 style={{ fontSize: '32px', color: '#333', 
-  marginBottom: '16px' }}>Profile Not Found</h1>
-            <p style={{ fontSize: '18px', color: '#666', lineHeight: 
-  '1.6' }}>
-              The requested profile could not be found. Please check
-  the username and try again.
-            </p>
-          </div>
-        </div>
-      );
-    }
+    const displayName = username;
+    const initials = displayName.split(' ').map(n =>
+  n[0]).join('').toUpperCase().slice(0, 2) ||
+      username.charAt(0).toUpperCase();
 
     return (
       <main style={{ 
@@ -282,19 +113,8 @@
               color: '#666',
               margin: '0 0 32px'
             }}>
-              @{sanitizedUsername}
+              @{username}
             </p>
-
-            {sanitizedBio && (
-              <p style={{
-                fontSize: '16px',
-                color: '#333',
-                margin: '0 0 24px',
-                lineHeight: '1.5'
-              }}>
-                {sanitizedBio}
-              </p>
-            )}
 
             <div style={{
               background: '#F8F8F8',
@@ -327,17 +147,6 @@
                   fontWeight: '600',
                   transition: 'all 0.2s',
                   boxShadow: '0 4px 12px rgba(255,59,48,0.3)'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform =
-  'translateY(-2px)';
-                  e.currentTarget.style.boxShadow = '0 8px 20px
-  rgba(255,59,48,0.4)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow = '0 4px 12px
-  rgba(255,59,48,0.3)';
                 }}
               >
                 Get Revolv
