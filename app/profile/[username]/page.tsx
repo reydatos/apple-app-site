@@ -20,9 +20,34 @@
     return (
       <>
         <Head>
-          <meta name="apple-itunes-app" content="app-clip-bundle-id=com.a8media.revolv.clip" />
-          <title>{displayName} - Revolv</title>
+          {/* Basic Meta Tags */}
+          <title>{displayName} - Revolv Profile</title>
+          <meta name="description" content={`Connect with ${displayName} on Revolv. Exchange contact 
+  information instantly and build your professional network.`} />
           <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+          {/* Open Graph Meta Tags for rich previews */}
+          <meta property="og:type" content="profile" />
+          <meta property="og:title" content={`${displayName} - Revolv Profile`} />
+          <meta property="og:description" content={`Connect with ${displayName} on Revolv. Exchange contact 
+  information instantly and build your professional network.`} />
+          <meta property="og:url" content={`https://getrevolv.com/profile/${username}`} />
+          <meta property="og:image" content="https://getrevolv.com/revolv-og-image.png" />
+          <meta property="og:image:width" content="1200" />
+          <meta property="og:image:height" content="630" />
+          <meta property="og:image:alt" content="Revolv - Connect and network instantly" />
+          <meta property="og:site_name" content="Revolv" />
+
+          {/* Twitter Card Meta Tags */}
+          <meta name="twitter:card" content="summary_large_image" />
+          <meta name="twitter:title" content={`${displayName} - Revolv Profile`} />
+          <meta name="twitter:description" content={`Connect with ${displayName} on Revolv. Exchange contact
+   information instantly and build your professional network.`} />
+          <meta name="twitter:image" content="https://getrevolv.com/revolv-og-image.png" />
+          <meta name="twitter:image:alt" content="Revolv - Connect and network instantly" />
+
+          {/* Apple App Banner */}
+          <meta name="apple-itunes-app" content="app-clip-bundle-id=com.a8media.revolv.clip" />
         </Head>
         <main style={{ 
           minHeight: '100vh',
