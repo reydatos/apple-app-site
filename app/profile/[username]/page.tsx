@@ -1,4 +1,4 @@
-  "use client";
+"use client";
   import { useEffect, useState } from 'react';
   import Head from 'next/head';
 
@@ -71,11 +71,11 @@
               margin: '0 0 40px',
               lineHeight: '1.6'
             }}>
-              Connect with {username} on Revolv to exchange contact information instantly
+              Join Revolv to connect with {username} and build your professional network instantly
             </p>
 
             <a 
-              href={`https://getrevolv.com/profile/${username}`}
+              href="https://apps.apple.com/app/revolv"
               style={{
                 display: 'inline-block',
                 padding: '18px 40px',
@@ -86,7 +86,8 @@
                 fontSize: '18px',
                 fontWeight: '600',
                 transition: 'transform 0.2s, box-shadow 0.2s',
-                boxShadow: '0 4px 20px rgba(0,122,255,0.3)'
+                boxShadow: '0 4px 20px rgba(0,122,255,0.3)',
+                marginBottom: '16px'
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.transform = 'translateY(-2px)';
@@ -97,33 +98,16 @@
                 e.currentTarget.style.boxShadow = '0 4px 20px rgba(0,122,255,0.3)';
               }}
             >
-              Open in Revolv
+              Get Revolv
             </a>
 
-            <div style={{
-              marginTop: '32px',
-              paddingTop: '32px',
-              borderTop: '1px solid #eee'
+            <p style={{
+              fontSize: '14px',
+              color: '#999',
+              margin: '16px 0 0'
             }}>
-              <p style={{
-                fontSize: '14px',
-                color: '#999',
-                margin: '0 0 16px'
-              }}>
-                Don't have Revolv yet?
-              </p>
-              <a 
-                href="https://apps.apple.com/app/revolv"
-                style={{
-                  fontSize: '16px',
-                  color: '#007AFF',
-                  textDecoration: 'none',
-                  fontWeight: '500'
-                }}
-              >
-                Download from App Store →
-              </a>
-            </div>
+              Instant connections • Share profiles • Network smarter
+            </p>
           </div>
         </main>
       </>
