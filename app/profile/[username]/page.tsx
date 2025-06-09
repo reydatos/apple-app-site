@@ -2,47 +2,206 @@
   import { useEffect, useState } from 'react';
   import Head from 'next/head';
 
+  // Types for better type safety
+  interface ProfileData {
+    id: string;
+    full_name: string;
+    username: string;
+    bio?: string;
+    created_at: string;
+  }
+
+  interface ApiResponse {
+    data: ProfileData | null;
+    error: string | null;
+  }
+
   export default function ProfilePage({ params }: { params: Promise<{
    username: string }> }) {
     const [username, setUsername] = useState<string>('');
-    const [profileData, setProfileData] = useState<any>(null);
+    const [profileData, setProfileData] = useState<ProfileData |
+  null>(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    // Input validation function
+    const isValidUsername = (username: string): boolean => {
+      // Username should be 3-30 characters, alphanumeric, 
+  underscore, hyphen only
+      const usernameRegex = /^[a-zA-Z0-9_-]{3,30}$/;
+      return usernameRegex.test(username);
+    };
+
+    // Sanitize string to prevent XSS
+    const sanitizeString = (str: string): string => {
+      return str.replace(/[<>\"'&]/g, (match) => {
+        const escapeMap: { [key: string]: string } = {
+          '<': '&lt;',
+          '>': '&gt;',
+          '"': '&quot;',
+          "'": '&#39;',
+          '&': '&amp;'
+        };
+        return escapeMap[match];
+      });
+    };
+
+    // Secure API call with proper error handling
+    const fetchProfileData = async (username: string):
+  Promise<ApiResponse> => {
+      try {
+        // Validate environment variables exist
+        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+        const supabaseKey =
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+        if (!supabaseUrl || !supabaseKey) {
+          throw new Error('Missing required environment 
+  configuration');
+        }
+
+        // Input validation
+        if (!isValidUsername(username)) {
+          throw new Error('Invalid username format');
+        }
+
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(),
+  10000); // 10s timeout
+
+        const response = await fetch(
+          `${supabaseUrl}/rest/v1/profiles?username=eq.${encodeURICom
+  ponent(username)}&select=id,full_name,username,bio,created_at`,
+          {
+            method: 'GET',
+            headers: {
+              'apikey': supabaseKey,
+              'Authorization': `Bearer ${supabaseKey}`,
+              'Content-Type': 'application/json',
+              'Accept': 'application/json'
+            },
+            signal: controller.signal
+          }
+        );
+
+        clearTimeout(timeoutId);
+
+        if (!response.ok) {
+          // Don't expose internal error details to client
+          throw new Error('Failed to fetch profile data');
+        }
+
+        const data = await response.json();
+
+        // Validate response structure
+        if (!Array.isArray(data)) {
+          throw new Error('Invalid response format');
+        }
+
+        const profile = data[0] || null;
+
+        // Validate profile data structure if it exists
+        if (profile && (!profile.id || !profile.username)) {
+          throw new Error('Invalid profile data structure');
+        }
+
+        return { data: profile, error: null };
+
+      } catch (error) {
+        console.error('Profile fetch error:', error);
+
+        // Return user-friendly error messages, don't expose internal
+   details
+        if (error instanceof Error) {
+          if (error.name === 'AbortError') {
+            return { data: null, error: 'Request timeout' };
+          }
+          if (error.message === 'Invalid username format') {
+            return { data: null, error: 'Invalid username' };
+          }
+        }
+
+        return { data: null, error: 'Unable to load profile' };
+      }
+    };
 
     useEffect(() => {
       const getParams = async () => {
-        const resolvedParams = await params;
-        setUsername(resolvedParams.username);
-
-        // Fetch profile data from Supabase using environment 
-  variables
         try {
-          const response = await fetch(
-            `${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/profiles
-  ?username=eq.${resolvedParams.username}`,
-            {
-              headers: {
-                'apikey': process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-                'Authorization': `Bearer 
-  ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY}`,
-                'Content-Type': 'application/json'
-              }
-            }
-          );
+          const resolvedParams = await params;
+          const usernameParam = resolvedParams.username;
 
-          if (response.ok) {
-            const data = await response.json();
-            setProfileData(data[0] || null);
+          if (!usernameParam) {
+            setError('Username is required');
+            setIsLoading(false);
+            return;
           }
+
+          setUsername(usernameParam);
+
+          const result = await fetchProfileData(usernameParam);
+
+          if (result.error) {
+            setError(result.error);
+          } else {
+            setProfileData(result.data);
+          }
+
         } catch (error) {
-          console.error('Error fetching profile:', error);
+          setError('Failed to load profile');
+        } finally {
+          setIsLoading(false);
         }
       };
+
       getParams();
     }, [params]);
 
-    const displayName = profileData?.full_name || username;
-    const initials = displayName.split(' ').map((n: string) =>
-  n[0]).join('').toUpperCase().slice(0, 2) ||
-      username.charAt(0).toUpperCase();
+    // Compute display values with sanitization
+    const displayName = profileData?.full_name
+      ? sanitizeString(profileData.full_name)
+      : sanitizeString(username);
+
+    const sanitizedUsername = sanitizeString(username);
+    const sanitizedBio = profileData?.bio ?
+  sanitizeString(profileData.bio) : null;
+
+    const initials = displayName
+      .split(' ')
+      .map(n => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2) || sanitizedUsername.charAt(0).toUpperCase();
+
+    // Handle loading and error states
+    if (isLoading) {
+      return (
+        <div style={{ 
+          minHeight: '100vh', 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'center' 
+        }}>
+          Loading...
+        </div>
+      );
+    }
+
+    if (error) {
+      return (
+        <div style={{ 
+          minHeight: '100vh', 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'center' 
+        }}>
+          <div style={{ textAlign: 'center' }}>
+            <h1>Profile Not Found</h1>
+            <p>The requested profile could not be found.</p>
+          </div>
+        </div>
+      );
+    }
 
     return (
       <>
@@ -54,20 +213,29 @@
           <meta name="viewport" content="width=device-width, 
   initial-scale=1" />
 
+          {/* Security headers */}
+          <meta httpEquiv="X-Content-Type-Options" content="nosniff" 
+  />
+          <meta httpEquiv="X-Frame-Options" content="DENY" />
+          <meta httpEquiv="X-XSS-Protection" content="1; mode=block" 
+  />
+
+          {/* Open Graph Meta Tags */}
           <meta property="og:type" content="profile" />
           <meta property="og:title" content={`${displayName} - Revolv
    Profile`} />
           <meta property="og:description" content={`Connect with 
   ${displayName} on Revolv. Exchange contact information instantly 
   and build your professional network.`} />
-          <meta property="og:url" 
-  content={`https://getrevolv.com/profile/${username}`} />
+          <meta property="og:url" content={`https://getrevolv.com/pro
+  file/${encodeURIComponent(sanitizedUsername)}`} />
           <meta property="og:image" 
   content="https://getrevolv.com/revolv-og-image.png" />
           <meta property="og:image:width" content="1200" />
           <meta property="og:image:height" content="630" />
           <meta property="og:site_name" content="Revolv" />
 
+          {/* Twitter Card Meta Tags */}
           <meta name="twitter:card" content="summary_large_image" />
           <meta name="twitter:title" content={`${displayName} - 
   Revolv Profile`} />
@@ -77,6 +245,7 @@
           <meta name="twitter:image" 
   content="https://getrevolv.com/revolv-og-image.png" />
 
+          {/* Apple App Banner */}
           <meta name="apple-itunes-app" 
   content="app-clip-bundle-id=com.a8media.revolv.clip" />
         </Head>
@@ -135,8 +304,19 @@
                 color: '#666',
                 margin: '0 0 32px'
               }}>
-                @{username}
+                @{sanitizedUsername}
               </p>
+
+              {sanitizedBio && (
+                <p style={{
+                  fontSize: '16px',
+                  color: '#333',
+                  margin: '0 0 24px',
+                  lineHeight: '1.5'
+                }}>
+                  {sanitizedBio}
+                </p>
+              )}
 
               <div style={{
                 background: '#F8F8F8',
@@ -156,6 +336,8 @@
 
                 <a 
                   href="https://apps.apple.com/app/revolv"
+                  rel="noopener noreferrer"
+                  target="_blank"
                   style={{
                     display: 'inline-block',
                     padding: '16px 32px',
