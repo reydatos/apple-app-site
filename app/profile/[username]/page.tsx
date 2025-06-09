@@ -75,7 +75,7 @@
             </p>
 
             <a 
-              href={`revolv://profile/${username}`}
+              href={`https://getrevolv.com/profile/${username}`}
               style={{
                 display: 'inline-block',
                 padding: '18px 40px',
