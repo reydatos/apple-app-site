@@ -1,3 +1,7 @@
+<meta name="apple-itunes-app" content="app-id=YOUR_APP_ID, 
+app-clip-bundle-id=com.a8media.revolv.clip"
+<meta name="apple-mobile-web-app-capable" content="yes">
+
 import { Metadata } from "next";
 
 interface Props {
