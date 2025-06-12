@@ -1,4 +1,4 @@
-<meta name="apple-itunes-app" content="app-id=YOUR_APP_ID, 
+<meta name="apple-itunes-app" content="app-id=6504209742, 
 app-clip-bundle-id=com.a8media.revolv.clip"
 <meta name="apple-mobile-web-app-capable" content="yes">
 
@@ -37,7 +37,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       images: ["https://getrevolv.com/revolv-og-image.png"],
     },
     other: {
-      "apple-itunes-app": "app-clip-bundle-id=com.a8media.revolv.clip",
+      "apple-itunes-app": "app-id=6504209742, app-clip-bundle-id=com.a8media.revolv.clip",
+      "apple-mobile-web-app-capable": "yes",
     },
   };
 }
