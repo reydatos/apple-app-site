@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connect with User - Revolv</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Loading State -->
+    <div id="loading" class="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+        <div class="max-w-md w-full">
+            <div class="bg-white rounded-2xl shadow-xl p-8 text-center">
+                <div class="animate-pulse">
+                    <div class="w-24 h-24 bg-gray-300 rounded-full mx-auto mb-4"></div>
+                    <div class="h-6 bg-gray-300 rounded mb-2"></div>
+                    <div class="h-4 bg-gray-300 rounded mb-6"></div>
+                    <div class="h-12 bg-gray-300 rounded"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Page -->
+    <div id="profilePage" class="min-h-screen bg-gray-50 flex items-center justify-center px-4 hidden">
+        <div class="max-w-md w-full">
+            <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+                <!-- Profile Header -->
+                <div class="px-8 pt-8 pb-6 text-center">
+                    <!-- Profile Picture or Initial -->
+                    <div id="profilePicture" class="w-24 h-24 bg-gradient-to-br from-red-500 to-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <span id="profileInitial" class="text-3xl font-bold text-white">U</span>
+                    </div>
+                    
+                    <!-- Name and Username -->
+                    <h1 id="profileName" class="text-2xl font-bold text-gray-900 mb-1">User</h1>
+                    <p id="profileUsername" class="text-gray-600 mb-6">@user</p>
+                    
+                    <!-- Connection Message -->
+                    <div class="mb-8">
+                        <p id="connectionMessage" class="text-gray-700 text-lg leading-relaxed">
+                            Connect with this user on Revolv for instant networking
+                        </p>
+                    </div>
+                    
+                    <!-- Connect Button -->
+                    <button
+                        id="connectButton"
+                        class="w-full bg-gradient-to-r from-red-500 to-red-600 text-white font-semibold py-4 px-6 rounded-2xl shadow-lg hover:from-red-600 hover:to-red-700 transition-all duration-200"
+                    >
+                        Connect Now
+                    </button>
+                </div>
+                
+                <!-- Features Section -->
+                <div class="px-8 pb-8">
+                    <div class="grid grid-cols-3 gap-6 text-center">
+                        <div>
+                            <div class="text-gray-900 font-semibold text-sm mb-1">Instant</div>
+                            <div class="text-gray-600 text-sm">Connections</div>
+                        </div>
+                        <div>
+                            <div class="text-gray-900 font-semibold text-sm mb-1">Share</div>
+                            <div class="text-gray-600 text-sm">Profiles</div>
+                        </div>
+                        <div>
+                            <div class="text-gray-900 font-semibold text-sm mb-1">Network</div>
+                            <div class="text-gray-600 text-sm">Smarter</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Auth Options Modal -->
+    <div id="authModal" class="min-h-screen bg-gray-50 flex items-center justify-center px-4 hidden">
+        <div class="max-w-md w-full">
+            <div class="bg-white rounded-2xl shadow-xl p-8">
+                <div class="text-center mb-6">
+                    <h2 id="authTitle" class="text-2xl font-bold text-gray-900 mb-2">Connect with User</h2>
+                    <p class="text-gray-600">Choose how you'd like to sign up and connect instantly</p>
+                </div>
+                
+                <div class="space-y-4">
+                    <!-- Sign in with Apple -->
+                    <button
+                        id="appleSignIn"
+                        class="w-full bg-black text-white font-semibold py-4 px-6 rounded-2xl flex items-center justify-center space-x-3 hover:bg-gray-800 transition-colors"
+                    >
+                        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/>
+                        </svg>
+                        <span>Continue with Apple</span>
+                    </button>
+                    
+                    <!-- Sign in with LinkedIn -->
+                    <button
+                        id="linkedinSignIn"
+                        class="w-full bg-blue-600 text-white font-semibold py-4 px-6 rounded-2xl flex items-center justify-center space-x-3 hover:bg-blue-700 transition-colors"
+                    >
+                        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                        </svg>
+                        <span>Continue with LinkedIn</span>
+                    </button>
+                </div>
+                
+                <div class="mt-6 text-center">
+                    <button
+                        id="cancelAuth"
+                        class="text-gray-500 hover:text-gray-700 text-sm"
+                    >
+                        Cancel
+                    </button>
+                </div>
+                
+                <div class="mt-4 text-center">
+                    <p id="authDisclaimer" class="text-xs text-gray-500">
+                        By continuing, you agree to create a Revolv account and connect with this user
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success State -->
+    <div id="successPage" class="min-h-screen bg-gray-50 flex items-center justify-center px-4 hidden">
+        <div class="max-w-md w-full">
+            <div class="bg-white rounded-2xl shadow-xl p-8 text-center">
+                <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                </div>
+                <h1 class="text-2xl font-bold text-gray-900 mb-2">Connected!</h1>
+                <p id="successMessage" class="text-gray-600 mb-6">
+                    You're now connected with this user. Download Revolv for the full experience.
+                </p>
+                <div class="animate-pulse">
+                    <p class="text-sm text-gray-500">Redirecting to App Store...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Get URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const pathParts = window.location.pathname.split('/');
+        
+        // Extract profile data from URL
+        const profileData = {
+            username: pathParts[2] || 'user',
+            firstName: urlParams.get('name') || urlParams.get('firstName') || pathParts[2] || 'User',
+            fullName: urlParams.get('fullName') || urlParams.get('name'),
+            avatar: urlParams.get('avatar'),
+            title: urlParams.get('title'),
+            company: urlParams.get('company')
+        };
+        
+        const isConnectionRequest = urlParams.get('connect') === 'true';
+        
+        // Initialize Supabase with config from environment
+        let supabase;
+        
+        // Fetch config from Vercel environment
+        async function initializeSupabase() {
+            try {
+                const response = await fetch('/api/config');
+                const config = await response.json();
+                supabase = window.supabase.createClient(config.supabaseUrl, config.supabaseKey);
+            } catch (error) {
+                console.error('Failed to load config:', error);
+                // Fallback to App Store if config fails
+                fallbackToAppStore();
+            }
+        }
+        
+        let currentUser = null;
+        
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Initialize Supabase first
+            await initializeSupabase();
+            
+            // Check if user is already authenticated
+            const { data: { session } } = await supabase.auth.getSession();
+            currentUser = session?.user || null;
+            
+            // Update UI with profile data
+            updateProfileUI();
+            
+            // Show main page
+            document.getElementById('loading').classList.add('hidden');
+            document.getElementById('profilePage').classList.remove('hidden');
+            
+            // Handle OAuth callback
+            if (urlParams.get('step') === 'complete' && currentUser) {
+                await createConnection();
+            }
+        });
+        
+        function updateProfileUI() {
+            const displayName = profileData.fullName || profileData.firstName;
+            const initial = displayName.charAt(0).toUpperCase();
+            
+            document.getElementById('profileInitial').textContent = initial;
+            document.getElementById('profileName').textContent = displayName.toLowerCase();
+            document.getElementById('profileUsername').textContent = `@${profileData.username}`;
+            
+            // Update connection message
+            const message = isConnectionRequest 
+                ? `Join Revolv to connect with ${profileData.firstName} and exchange contact information instantly`
+                : `Connect with ${profileData.firstName} on Revolv for instant networking`;
+            document.getElementById('connectionMessage').textContent = message;
+            
+            // Update auth modal
+            document.getElementById('authTitle').textContent = `Connect with ${profileData.firstName}`;
+            document.getElementById('authDisclaimer').textContent = 
+                `By continuing, you agree to create a Revolv account and connect with ${profileData.firstName}`;
+        }
+        
+        // Event listeners
+        document.getElementById('connectButton').addEventListener('click', () => {
+            if (currentUser) {
+                createConnection();
+            } else {
+                showAuthModal();
+            }
+        });
+        
+        document.getElementById('cancelAuth').addEventListener('click', () => {
+            hideAuthModal();
+        });
+        
+        document.getElementById('appleSignIn').addEventListener('click', () => {
+            handleAppleAuth();
+        });
+        
+        document.getElementById('linkedinSignIn').addEventListener('click', () => {
+            handleLinkedInAuth();
+        });
+        
+        function showAuthModal() {
+            document.getElementById('profilePage').classList.add('hidden');
+            document.getElementById('authModal').classList.remove('hidden');
+        }
+        
+        function hideAuthModal() {
+            document.getElementById('authModal').classList.add('hidden');
+            document.getElementById('profilePage').classList.remove('hidden');
+        }
+        
+        async function handleAppleAuth() {
+            try {
+                const { error } = await supabase.auth.signInWithOAuth({
+                    provider: 'apple',
+                    options: {
+                        redirectTo: `${window.location.origin}/web/profile.html?username=${profileData.username}&connect=true&step=complete&name=${encodeURIComponent(profileData.firstName)}`
+                    }
+                });
+                
+                if (error) {
+                    console.error('Apple OAuth error:', error);
+                    fallbackToAppStore();
+                }
+            } catch (error) {
+                console.error('Apple auth error:', error);
+                fallbackToAppStore();
+            }
+        }
+        
+        async function handleLinkedInAuth() {
+            try {
+                const { error } = await supabase.auth.signInWithOAuth({
+                    provider: 'linkedin_oidc',
+                    options: {
+                        redirectTo: `${window.location.origin}/web/profile.html?username=${profileData.username}&connect=true&step=complete&name=${encodeURIComponent(profileData.firstName)}`
+                    }
+                });
+                
+                if (error) {
+                    console.error('LinkedIn OAuth error:', error);
+                    fallbackToAppStore();
+                }
+            } catch (error) {
+                console.error('LinkedIn auth error:', error);
+                fallbackToAppStore();
+            }
+        }
+        
+        async function createConnection() {
+            try {
+                // In a real implementation, call your backend API
+                // For now, simulate success
+                showSuccessPage();
+                
+                // Auto-redirect after 2 seconds
+                setTimeout(() => {
+                    window.location.href = 'https://apps.apple.com/app/revolv';
+                }, 2000);
+            } catch (error) {
+                console.error('Connection creation error:', error);
+                fallbackToAppStore();
+            }
+        }
+        
+        function showSuccessPage() {
+            document.getElementById('authModal').classList.add('hidden');
+            document.getElementById('profilePage').classList.add('hidden');
+            document.getElementById('successMessage').textContent = 
+                `You're now connected with ${profileData.firstName}. Download Revolv for the full experience.`;
+            document.getElementById('successPage').classList.remove('hidden');
+        }
+        
+        function fallbackToAppStore() {
+            window.location.href = 'https://apps.apple.com/app/revolv';
+        }
+    </script>
+</body>
+</html>
