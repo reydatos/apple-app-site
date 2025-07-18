@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
+import { createClient } from '@supabase/supabase-js';
 
 export default function ProfilePage() {
   const params = useParams();
@@ -9,7 +10,7 @@ export default function ProfilePage() {
   const [showAuthOptions, setShowAuthOptions] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
   const [connectionComplete, setConnectionComplete] = useState(false);
-  const [supabase, setSupabase] = useState(null);
+  const [supabase, setSupabase] = useState<any>(null);
   
   // Get profile data from URL parameters
   const profileData = {
@@ -30,9 +31,8 @@ export default function ProfilePage() {
         const response = await fetch('/api/config');
         const config = await response.json();
         
-        if (window.supabase) {
-          setSupabase(window.supabase.createClient(config.supabaseUrl, config.supabaseKey));
-        }
+        const supabaseClient = createClient(config.supabaseUrl, config.supabaseKey);
+        setSupabase(supabaseClient);
       } catch (error) {
         console.error('Failed to initialize Supabase:', error);
       }
@@ -171,9 +171,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <>
-      <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
         <div className="max-w-md w-full">
           <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
             <div className="px-8 pt-8 pb-6 text-center">
@@ -234,6 +232,6 @@ export default function ProfilePage() {
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }
