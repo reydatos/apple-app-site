@@ -1,211 +1,239 @@
-<meta name="apple-itunes-app" content="app-id=6504209742, 
-app-clip-bundle-id=com.a8media.revolv.clip"
-<meta name="apple-mobile-web-app-capable" content="yes">
+'use client';
 
-import { Metadata } from "next";
+import { useState, useEffect } from 'react';
+import { useParams, useSearchParams } from 'next/navigation';
 
-interface Props {
-  params: Promise<{ username: string }>;
-}
-
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { username } = await params;
-  const displayName = username;
-
-  return {
-    title: `${displayName} - Revolv Profile`,
-    description: `Connect with ${displayName} on Revolv. Exchange contact information instantly and build your professional network.`,
-    openGraph: {
-      type: "profile",
-      title: `${displayName} - Revolv Profile`,
-      description: `Connect with ${displayName} on Revolv. Exchange contact information instantly and build your professional network.`,
-      url: `https://getrevolv.com/profile/${username}`,
-      images: [
-        {
-          url: "https://getrevolv.com/revolv-og-image.png",
-          width: 1200,
-          height: 630,
-          alt: "Revolv - Connect and network instantly",
-        },
-      ],
-      siteName: "Revolv",
-    },
-    twitter: {
-      card: "summary_large_image",
-      title: `${displayName} - Revolv Profile`,
-      description: `Connect with ${displayName} on Revolv. Exchange contact information instantly and build your professional network.`,
-      images: ["https://getrevolv.com/revolv-og-image.png"],
-    },
-    other: {
-      "apple-itunes-app": "app-id=6504209742, app-clip-bundle-id=com.a8media.revolv.clip",
-      "apple-mobile-web-app-capable": "yes",
-    },
+export default function ProfilePage() {
+  const params = useParams();
+  const searchParams = useSearchParams();
+  const [showAuthOptions, setShowAuthOptions] = useState(false);
+  const [isConnecting, setIsConnecting] = useState(false);
+  const [connectionComplete, setConnectionComplete] = useState(false);
+  const [supabase, setSupabase] = useState(null);
+  
+  // Get profile data from URL parameters
+  const profileData = {
+    username: params.username as string,
+    firstName: searchParams.get('name') || searchParams.get('firstName') || params.username,
+    fullName: searchParams.get('fullName') || searchParams.get('name'),
+    avatar: searchParams.get('avatar'),
+    title: searchParams.get('title'),
+    company: searchParams.get('company')
   };
-}
+  
+  const isConnectionRequest = searchParams.get('connect') === 'true';
+  
+  useEffect(() => {
+    // Initialize Supabase
+    async function initSupabase() {
+      try {
+        const response = await fetch('/api/config');
+        const config = await response.json();
+        
+        if (window.supabase) {
+          setSupabase(window.supabase.createClient(config.supabaseUrl, config.supabaseKey));
+        }
+      } catch (error) {
+        console.error('Failed to initialize Supabase:', error);
+      }
+    }
+    
+    initSupabase();
+  }, []);
 
-export default async function ProfilePage({ params }: Props) {
-  const { username } = await params;
-  const displayName = username;
-  const initials = displayName
-    .split(" ")
-    .map((n) => n[0])
-    .join("")
-    .toUpperCase()
-    .slice(0, 2) || username.charAt(0).toUpperCase();
-
-  const mainStyle = {
-    minHeight: "100vh",
-    background: "#FAFAFA",
-    display: "flex",
-    flexDirection: "column" as const,
-    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+  const handleConnect = () => {
+    setShowAuthOptions(true);
   };
 
-  const containerStyle = {
-    flex: 1,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    padding: "40px 20px",
+  const handleAppleAuth = async () => {
+    if (!supabase) return;
+    
+    setIsConnecting(true);
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'apple',
+        options: {
+          redirectTo: `${window.location.origin}/profile/${profileData.username}?connect=true&step=complete&name=${encodeURIComponent(profileData.firstName)}`
+        }
+      });
+      
+      if (error) {
+        console.error('Apple OAuth error:', error);
+        window.location.href = 'https://apps.apple.com/app/revolv';
+      }
+    } catch (error) {
+      console.error('Apple auth error:', error);
+      window.location.href = 'https://apps.apple.com/app/revolv';
+    }
   };
 
-  const cardStyle = {
-    background: "white",
-    borderRadius: "20px",
-    padding: "48px 32px",
-    maxWidth: "400px",
-    width: "100%",
-    textAlign: "center" as const,
-    boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
+  const handleLinkedInAuth = async () => {
+    if (!supabase) return;
+    
+    setIsConnecting(true);
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'linkedin_oidc',
+        options: {
+          redirectTo: `${window.location.origin}/profile/${profileData.username}?connect=true&step=complete&name=${encodeURIComponent(profileData.firstName)}`
+        }
+      });
+      
+      if (error) {
+        console.error('LinkedIn OAuth error:', error);
+        window.location.href = 'https://apps.apple.com/app/revolv';
+      }
+    } catch (error) {
+      console.error('LinkedIn auth error:', error);
+      window.location.href = 'https://apps.apple.com/app/revolv';
+    }
   };
 
-  const avatarStyle = {
-    width: "120px",
-    height: "120px",
-    borderRadius: "50%",
-    margin: "0 auto 24px",
-    overflow: "hidden",
-    background: "#FF3B30",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    fontSize: "48px",
-    fontWeight: "600",
-    color: "white",
-  };
+  // Handle OAuth completion
+  useEffect(() => {
+    if (searchParams.get('step') === 'complete') {
+      setConnectionComplete(true);
+      setTimeout(() => {
+        window.location.href = 'https://apps.apple.com/app/revolv';
+      }, 2000);
+    }
+  }, [searchParams]);
 
-  const titleStyle = {
-    fontSize: "32px",
-    fontWeight: "700",
-    color: "#1C1C1C",
-    margin: "0 0 8px",
-  };
-
-  const usernameStyle = {
-    fontSize: "18px",
-    color: "#666",
-    margin: "0 0 32px",
-  };
-
-  const ctaContainerStyle = {
-    background: "#F8F8F8",
-    borderRadius: "12px",
-    padding: "20px",
-    margin: "32px 0",
-  };
-
-  const ctaTextStyle = {
-    fontSize: "16px",
-    color: "#666",
-    margin: "0 0 20px",
-    lineHeight: "1.6",
-  };
-
-  const buttonStyle = {
-    display: "inline-block",
-    padding: "16px 32px",
-    background: "#FF3B30",
-    color: "white",
-    textDecoration: "none",
-    borderRadius: "12px",
-    fontSize: "17px",
-    fontWeight: "600",
-    transition: "all 0.2s",
-    boxShadow: "0 4px 12px rgba(255,59,48,0.3)",
-  };
-
-  const featuresStyle = {
-    display: "flex",
-    justifyContent: "center",
-    gap: "24px",
-    marginTop: "24px",
-  };
-
-  const featureStyle = {
-    textAlign: "center" as const,
-  };
-
-  const featureLabelStyle = {
-    fontSize: "14px",
-    color: "#999",
-    marginBottom: "4px",
-  };
-
-  const featureValueStyle = {
-    fontSize: "16px",
-    color: "#333",
-    fontWeight: "600",
-  };
-
-  const dividerStyle = {
-    width: "1px",
-    background: "#E5E5E5",
-  };
-
-  return (
-    <main style={mainStyle}>
-      <div style={containerStyle}>
-        <div style={cardStyle}>
-          <div style={avatarStyle}>{initials}</div>
-
-          <h1 style={titleStyle}>{displayName}</h1>
-
-          <p style={usernameStyle}>@{username}</p>
-
-          <div style={ctaContainerStyle}>
-            <p style={ctaTextStyle}>
-              Join Revolv to connect with {displayName} and exchange contact
-              information instantly
+  if (connectionComplete) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+        <div className="max-w-md w-full">
+          <div className="bg-white rounded-2xl shadow-xl p-8 text-center">
+            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">Connected!</h1>
+            <p className="text-gray-600 mb-6">
+              You're now connected with {profileData.firstName}. Download Revolv for the full experience.
             </p>
-
-            <a
-              href="https://apps.apple.com/app/revolv"
-              rel="noopener noreferrer"
-              target="_blank"
-              style={buttonStyle}
-            >
-              Get Revolv
-            </a>
-          </div>
-
-          <div style={featuresStyle}>
-            <div style={featureStyle}>
-              <div style={featureLabelStyle}>Instant</div>
-              <div style={featureValueStyle}>Connections</div>
-            </div>
-            <div style={dividerStyle} />
-            <div style={featureStyle}>
-              <div style={featureLabelStyle}>Share</div>
-              <div style={featureValueStyle}>Profiles</div>
-            </div>
-            <div style={dividerStyle} />
-            <div style={featureStyle}>
-              <div style={featureLabelStyle}>Network</div>
-              <div style={featureValueStyle}>Smarter</div>
+            <div className="animate-pulse">
+              <p className="text-sm text-gray-500">Redirecting to App Store...</p>
             </div>
           </div>
         </div>
       </div>
-    </main>
+    );
+  }
+
+  if (showAuthOptions) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+        <div className="max-w-md w-full">
+          <div className="bg-white rounded-2xl shadow-xl p-8">
+            <div className="text-center mb-6">
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Connect with {profileData.firstName}</h2>
+              <p className="text-gray-600">Choose how you'd like to sign up and connect instantly</p>
+            </div>
+            
+            <div className="space-y-4">
+              <button
+                onClick={handleAppleAuth}
+                disabled={isConnecting}
+                className="w-full bg-black text-white font-semibold py-4 px-6 rounded-2xl flex items-center justify-center space-x-3 hover:bg-gray-800 transition-colors disabled:opacity-50"
+              >
+                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/>
+                </svg>
+                <span>Continue with Apple</span>
+              </button>
+              
+              <button
+                onClick={handleLinkedInAuth}
+                disabled={isConnecting}
+                className="w-full bg-blue-600 text-white font-semibold py-4 px-6 rounded-2xl flex items-center justify-center space-x-3 hover:bg-blue-700 transition-colors disabled:opacity-50"
+              >
+                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                </svg>
+                <span>Continue with LinkedIn</span>
+              </button>
+            </div>
+            
+            <div className="mt-6 text-center">
+              <button
+                onClick={() => setShowAuthOptions(false)}
+                className="text-gray-500 hover:text-gray-700 text-sm"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+        <div className="max-w-md w-full">
+          <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
+            <div className="px-8 pt-8 pb-6 text-center">
+              <div className="w-24 h-24 bg-gradient-to-br from-red-500 to-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                {profileData.avatar ? (
+                  <img 
+                    src={profileData.avatar} 
+                    alt={profileData.fullName || profileData.firstName}
+                    className="w-full h-full rounded-full object-cover"
+                  />
+                ) : (
+                  <span className="text-3xl font-bold text-white">
+                    {(profileData.firstName || profileData.username || 'U').charAt(0).toUpperCase()}
+                  </span>
+                )}
+              </div>
+              
+              <h1 className="text-2xl font-bold text-gray-900 mb-1">
+                {(profileData.fullName || profileData.firstName || profileData.username || 'User').toLowerCase()}
+              </h1>
+              <p className="text-gray-600 mb-6">
+                @{profileData.username}
+              </p>
+              
+              <div className="mb-8">
+                <p className="text-gray-700 text-lg leading-relaxed">
+                  {isConnectionRequest 
+                    ? `Join Revolv to connect with ${profileData.firstName} and exchange contact information instantly`
+                    : `Connect with ${profileData.firstName} on Revolv for instant networking`
+                  }
+                </p>
+              </div>
+              
+              <button
+                onClick={handleConnect}
+                className="w-full bg-gradient-to-r from-red-500 to-red-600 text-white font-semibold py-4 px-6 rounded-2xl shadow-lg hover:from-red-600 hover:to-red-700 transition-all duration-200"
+              >
+                {isConnectionRequest ? 'Connect Now' : 'Get Revolv'}
+              </button>
+            </div>
+            
+            <div className="px-8 pb-8">
+              <div className="grid grid-cols-3 gap-6 text-center">
+                <div>
+                  <div className="text-gray-900 font-semibold text-sm mb-1">Instant</div>
+                  <div className="text-gray-600 text-sm">Connections</div>
+                </div>
+                <div>
+                  <div className="text-gray-900 font-semibold text-sm mb-1">Share</div>
+                  <div className="text-gray-600 text-sm">Profiles</div>
+                </div>
+                <div>
+                  <div className="text-gray-900 font-semibold text-sm mb-1">Network</div>
+                  <div className="text-gray-600 text-sm">Smarter</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
   );
 }
