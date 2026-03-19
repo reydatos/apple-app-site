@@ -1,32 +1,31 @@
-'use client';
+import type { Metadata } from "next";
 
-import { useEffect } from 'react';
+export const metadata: Metadata = {
+  title: "Revolv App Clip",
+  description: "Quick connect with Revolv",
+  other: {
+    "apple-itunes-app": `app-clip-bundle-id=com.a8media.revolv.clip`,
+  },
+};
 
 export default function AppClipTestLaunch() {
-  useEffect(() => {
-    console.log('[App Clip] Launch initiated at /appclip/test-launch');
-    // Here’s where you’d call your analytics or tracking
-  }, []);
-
   return (
-    <main className="min-h-screen flex items-center justify-center bg-white text-black px-4">
-      <div className="text-center">
-        <h1 className="text-3xl font-bold mb-4">Welcome to Revolv 🎉</h1>
-        <p className="text-lg text-gray-600 mb-6">
-          You’ve just launched the App Clip.
+    <main className="min-h-screen flex items-center justify-center bg-[var(--background)] px-4">
+      <div className="text-center max-w-md">
+        <h1 className="text-3xl font-bold text-[var(--foreground)] mb-4">
+          Welcome to Revolv
+        </h1>
+        <p className="text-lg text-[var(--revolv-gray)] mb-6">
+          You&apos;ve launched the Revolv App Clip. Get the full app to unlock
+          relationship intelligence.
         </p>
-        <button
-          className="bg-black text-white px-6 py-3 rounded-lg font-medium hover:bg-gray-800"
-          onClick={() => {
-            // Placeholder: Send them to a profile creation screen or full app CTA
-            window.location.href = 'https://getrevolv.com/app/profile/create';
-          }}
+        <a
+          href="https://apps.apple.com/app/revolv"
+          className="inline-block bg-[var(--revolv-coral)] text-white px-6 py-3 rounded-2xl font-semibold hover:bg-[var(--revolv-coral-dark)] transition-colors"
         >
-          Create Your Profile
-        </button>
+          Get Revolv
+        </a>
       </div>
     </main>
   );
 }
-
-// rebuild
