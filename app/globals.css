@@ -80,3 +80,55 @@ body {
   background-size: 200% 100%;
   animation: shimmer 1.5s ease-in-out infinite;
 }
+
+/* Excellence badges — matches iOS ExcellenceBadge */
+.excellence-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  background: linear-gradient(135deg, var(--revolv-coral), #d4603a);
+  color: white;
+  box-shadow: 0 2px 6px rgba(232, 115, 74, 0.3);
+}
+
+.excellence-badge-green {
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  box-shadow: 0 2px 6px rgba(34, 197, 94, 0.3);
+}
+
+/* Skill capsules — matches iOS horizontal scrollable capsules */
+.skill-capsule {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--revolv-blue-dark);
+  background: rgba(72, 120, 168, 0.08);
+  border: 1px solid rgba(72, 120, 168, 0.15);
+}
+
+/* Intelligence card — subtle gradient background */
+.intelligence-card {
+  background: linear-gradient(
+    135deg,
+    rgba(232, 115, 74, 0.04) 0%,
+    rgba(72, 120, 168, 0.06) 50%,
+    rgba(154, 125, 56, 0.04) 100%
+  );
+  border: 0.5px solid rgba(232, 115, 74, 0.12);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+/* Intelligence feature tiles */
+.intelligence-feature {
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 0.5px solid rgba(232, 115, 74, 0.1);
+}

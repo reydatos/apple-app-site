@@ -4,6 +4,17 @@ import { useState, useEffect, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
 
+interface ProfileStats {
+  connections: number;
+  introductions: number;
+  responseRate: number; // 0-100
+}
+
+interface ProfileBadges {
+  introduction: string | null; // "Super Connector" | "Top Connector" | null
+  response: string | null; // "Super Responsive" | "Highly Responsive" | null
+}
+
 interface ProfileData {
   username: string;
   firstName: string;
@@ -11,6 +22,13 @@ interface ProfileData {
   avatar: string | null;
   title: string | null;
   company: string | null;
+  location: string | null;
+  bio: string | null;
+  skills: string[];
+  careerStage: string | null;
+  memberSince: string | null;
+  stats: ProfileStats | null;
+  badges: ProfileBadges;
 }
 
 interface ProfileClientProps {
@@ -128,6 +146,8 @@ export function ProfileClient({
     .filter(Boolean)
     .join(" at ");
   const initial = (displayName || "U").charAt(0).toUpperCase();
+  const hasStats = profileData.stats && profileData.stats.connections > 0;
+  const hasBadge = profileData.badges.introduction || profileData.badges.response;
 
   // --- Connected state ---
   if (view === "connected") {
@@ -135,30 +155,15 @@ export function ProfileClient({
       <GlassCard>
         <div className="text-center py-4">
           <div className="w-20 h-20 bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-full flex items-center justify-center mx-auto mb-5">
-            <svg
-              className="w-10 h-10 text-emerald-500"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M5 13l4 4L19 7"
-              />
+            <svg className="w-10 h-10 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
             </svg>
           </div>
-          <h1 className="text-2xl font-bold text-[var(--revolv-charcoal)] mb-2">
-            Connected!
-          </h1>
+          <h1 className="text-2xl font-bold text-[var(--revolv-charcoal)] mb-2">Connected!</h1>
           <p className="text-[var(--revolv-gray)] text-[15px] leading-relaxed mb-6">
-            You&apos;re now connected with {profileData.firstName}. Open Revolv
-            for the full experience.
+            You&apos;re now connected with {profileData.firstName}. Open Revolv for the full experience.
           </p>
-          <p className="text-sm text-[var(--revolv-gray-light)] animate-pulse">
-            Opening App Store...
-          </p>
+          <p className="text-sm text-[var(--revolv-gray-light)] animate-pulse">Opening App Store...</p>
         </div>
       </GlassCard>
     );
@@ -170,26 +175,13 @@ export function ProfileClient({
       <GlassCard>
         <div className="text-center py-4">
           <div className="w-20 h-20 bg-gradient-to-br from-[var(--revolv-coral)]/10 to-[var(--revolv-coral)]/20 rounded-full flex items-center justify-center mx-auto mb-5">
-            <svg
-              className="w-10 h-10 text-[var(--revolv-coral)]"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-              />
+            <svg className="w-10 h-10 text-[var(--revolv-coral)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
             </svg>
           </div>
-          <h1 className="text-2xl font-bold text-[var(--revolv-charcoal)] mb-2">
-            Info Sent!
-          </h1>
+          <h1 className="text-2xl font-bold text-[var(--revolv-charcoal)] mb-2">Info Sent!</h1>
           <p className="text-[var(--revolv-gray)] text-[15px] leading-relaxed">
-            {profileData.firstName} will see your contact info in Revolv.
-            They&apos;ll be in touch!
+            {profileData.firstName} will see your contact info in Revolv. They&apos;ll be in touch!
           </p>
         </div>
       </GlassCard>
@@ -200,7 +192,6 @@ export function ProfileClient({
   if (view === "auth") {
     return (
       <GlassCard>
-        {/* Mini profile header */}
         <div className="flex items-center gap-3 mb-6 pb-5 border-b border-[var(--revolv-divider)]">
           <Avatar avatar={profileData.avatar} initial={initial} size="sm" />
           <div>
@@ -222,7 +213,6 @@ export function ProfileClient({
             <AppleIcon />
             <span>Continue with Apple</span>
           </button>
-
           <button
             onClick={() => handleOAuth("linkedin_oidc")}
             disabled={isConnecting}
@@ -245,106 +235,205 @@ export function ProfileClient({
     );
   }
 
-  // --- Main profile card (iOS-aligned) ---
+  // --- Main profile card with relationship intelligence ---
   return (
-    <GlassCard>
-      {/* Horizontal profile header — matches iOS UnifiedProfileCard layout */}
-      <div className="flex items-start gap-5 mb-5">
-        {/* Avatar (left) — 88px to match iOS Profile.avatarSize */}
-        <Avatar avatar={profileData.avatar} initial={initial} size="lg" />
+    <div className="space-y-4">
+      {/* Primary profile card */}
+      <GlassCard>
+        {/* Horizontal profile header — matches iOS UnifiedProfileCard layout */}
+        <div className="flex items-start gap-5 mb-1">
+          <Avatar avatar={profileData.avatar} initial={initial} size="lg" />
+          <div className="flex-1 min-w-0 pt-1">
+            <div className="flex items-center gap-2">
+              <h1 className="text-[22px] font-bold text-[var(--revolv-charcoal)] leading-tight truncate">
+                {displayName}
+              </h1>
+              {/* Verification badge */}
+              <svg className="w-5 h-5 text-green-500 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+              </svg>
+            </div>
+            {subtitle && (
+              <p className="text-[15px] text-[var(--revolv-gray)] mt-0.5 leading-snug">{subtitle}</p>
+            )}
+            {profileData.location && (
+              <div className="flex items-center gap-1 mt-1">
+                <svg className="w-3 h-3 text-[var(--revolv-gray-light)]" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
+                </svg>
+                <span className="text-sm text-[var(--revolv-gray-light)]">{profileData.location}</span>
+              </div>
+            )}
+            <p className="text-sm text-[var(--revolv-gray-light)] mt-1">@{profileData.username}</p>
+          </div>
+        </div>
 
-        {/* Name + details (right) */}
-        <div className="flex-1 min-w-0 pt-1">
-          <h1 className="text-[22px] font-bold text-[var(--revolv-charcoal)] leading-tight truncate">
-            {displayName}
-          </h1>
-          {subtitle && (
-            <p className="text-[15px] text-[var(--revolv-gray)] mt-0.5 leading-snug">
-              {subtitle}
-            </p>
-          )}
-          <p className="text-sm text-[var(--revolv-gray-light)] mt-1">
-            @{profileData.username}
+        {/* Excellence badges */}
+        {hasBadge && (
+          <div className="flex flex-wrap gap-2 mt-3 mb-1">
+            {profileData.badges.introduction && (
+              <span className="excellence-badge">
+                <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
+                  {profileData.badges.introduction === "Super Connector" ? (
+                    <path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zm14 3c0 .6-.4 1-1 1H6c-.6 0-1-.4-1-1v-1h14v1z" />
+                  ) : (
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                  )}
+                </svg>
+                {profileData.badges.introduction}
+              </span>
+            )}
+            {profileData.badges.response && (
+              <span className="excellence-badge excellence-badge-green">
+                <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+                {profileData.badges.response}
+              </span>
+            )}
+          </div>
+        )}
+
+        {/* Engagement stats — matches iOS UnifiedProfileCard stats row */}
+        {hasStats && (
+          <div className="grid grid-cols-3 gap-1 py-4 mt-3 border-t border-b border-[var(--revolv-divider)]">
+            <StatItem
+              value={profileData.stats!.connections.toString()}
+              label="Connections"
+              color="var(--revolv-accent)"
+            />
+            <StatItem
+              value={profileData.stats!.introductions.toString()}
+              label="Introductions"
+              color="var(--revolv-coral)"
+            />
+            <StatItem
+              value={`${profileData.stats!.responseRate}%`}
+              label="Response"
+              color={profileData.stats!.responseRate >= 85 ? "#22c55e" : "var(--revolv-gray-light)"}
+            />
+          </div>
+        )}
+
+        {/* Bio */}
+        {profileData.bio && (
+          <p className="text-[var(--revolv-gray)] text-[15px] leading-relaxed mt-4">
+            {profileData.bio}
           </p>
+        )}
+
+        {/* Skills capsules */}
+        {profileData.skills.length > 0 && (
+          <div className="flex flex-wrap gap-2 mt-4">
+            {profileData.skills.map((skill) => (
+              <span key={skill} className="skill-capsule">{skill}</span>
+            ))}
+          </div>
+        )}
+
+        {/* Member since */}
+        {profileData.memberSince && (
+          <p className="text-xs text-[var(--revolv-gray-light)] mt-4">
+            Member since {profileData.memberSince}
+          </p>
+        )}
+      </GlassCard>
+
+      {/* Relationship Intelligence card */}
+      <div className="intelligence-card rounded-3xl overflow-hidden px-6 py-5">
+        <div className="flex items-center gap-2 mb-4">
+          <div className="w-7 h-7 rounded-lg bg-[var(--revolv-coral)]/15 flex items-center justify-center">
+            <svg className="w-4 h-4 text-[var(--revolv-coral)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+            </svg>
+          </div>
+          <h2 className="text-sm font-semibold text-[var(--revolv-charcoal)] tracking-wide uppercase">
+            Relationship Intelligence
+          </h2>
+        </div>
+
+        <p className="text-[var(--revolv-gray)] text-[14px] leading-relaxed mb-4">
+          {isConnectionRequest
+            ? `Connect with ${profileData.firstName} on Revolv to unlock AI-powered relationship insights, smart follow-up reminders, and networking intelligence.`
+            : `${profileData.firstName} uses Revolv to build stronger professional relationships with AI-powered intelligence.`}
+        </p>
+
+        <div className="grid grid-cols-2 gap-3">
+          <IntelligenceFeature
+            icon={<path d="M13 10V3L4 14h7v7l9-11h-7z" />}
+            label="Smart Follow-ups"
+            detail="AI-timed reminders"
+          />
+          <IntelligenceFeature
+            icon={<path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />}
+            label="Network Mapping"
+            detail="Hidden connections"
+          />
+          <IntelligenceFeature
+            icon={<path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />}
+            label="Trust Scores"
+            detail="Relationship health"
+          />
+          <IntelligenceFeature
+            icon={<path d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />}
+            label="Intro Matching"
+            detail="Opportunity engine"
+          />
         </div>
       </div>
 
-      {/* Stats row — matches iOS UnifiedProfileCard stats section */}
-      <div className="grid grid-cols-3 gap-1 py-4 border-t border-b border-[var(--revolv-divider)]">
-        <StatItem label="Platform" value="Revolv" />
-        <StatItem label="Networking" value="Smart" />
-        <StatItem label="Intelligence" value="AI" />
-      </div>
+      {/* Connect / Guest Form card */}
+      <GlassCard>
+        {/* Description */}
+        <p className="text-[var(--revolv-gray)] text-[15px] leading-relaxed mb-5">
+          {isConnectionRequest
+            ? `Join Revolv to connect with ${profileData.firstName} and start building intelligent relationships.`
+            : `Connect with ${profileData.firstName} on Revolv for AI-powered relationship intelligence.`}
+        </p>
 
-      {/* Description */}
-      <p className="text-[var(--revolv-gray)] text-[15px] leading-relaxed mt-5 mb-6">
-        {isConnectionRequest
-          ? `Join Revolv to connect with ${profileData.firstName} and exchange contact info instantly.`
-          : `Connect with ${profileData.firstName} on Revolv for intelligent relationship management.`}
-      </p>
-
-      {/* Primary CTA */}
-      <button
-        onClick={() => setView("auth")}
-        className="w-full bg-[var(--revolv-coral)] text-white font-semibold py-4 px-6 rounded-2xl ios-shadow hover:bg-[var(--revolv-coral-dark)] active:scale-[0.98] transition-all duration-200"
-      >
-        {isConnectionRequest ? "Connect on Revolv" : "Get Revolv"}
-      </button>
-
-      {/* Divider */}
-      <div className="flex items-center gap-4 my-6">
-        <div className="flex-1 h-px bg-[var(--revolv-divider)]" />
-        <span className="text-xs text-[var(--revolv-gray-light)] uppercase tracking-wider font-medium">
-          or share your info
-        </span>
-        <div className="flex-1 h-px bg-[var(--revolv-divider)]" />
-      </div>
-
-      {/* Guest contact form */}
-      <form onSubmit={handleGuestSubmit} className="space-y-3">
-        <GlassInput
-          type="text"
-          placeholder="Your name *"
-          value={guestName}
-          onChange={(e) => setGuestName(e.target.value)}
-          required
-        />
-        <GlassInput
-          type="tel"
-          placeholder="Phone number"
-          value={guestPhone}
-          onChange={(e) => setGuestPhone(e.target.value)}
-        />
-        <GlassInput
-          type="email"
-          placeholder="Email address"
-          value={guestEmail}
-          onChange={(e) => setGuestEmail(e.target.value)}
-        />
-
-        {guestError && (
-          <p className="text-sm text-red-500 text-center">{guestError}</p>
-        )}
-
+        {/* Primary CTA */}
         <button
-          type="submit"
-          disabled={guestSubmitting || !guestName.trim()}
-          className="w-full py-3.5 px-6 rounded-2xl border-2 border-[var(--revolv-coral)] text-[var(--revolv-coral)] font-semibold hover:bg-[var(--revolv-coral)] hover:text-white active:scale-[0.98] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+          onClick={() => setView("auth")}
+          className="w-full bg-[var(--revolv-coral)] text-white font-semibold py-4 px-6 rounded-2xl ios-shadow hover:bg-[var(--revolv-coral-dark)] active:scale-[0.98] transition-all duration-200"
         >
-          {guestSubmitting
-            ? "Sending..."
-            : `Send to ${profileData.firstName}`}
+          {isConnectionRequest ? "Connect on Revolv" : "Get Revolv"}
         </button>
-      </form>
 
-      {/* Revolv badge — minimal branding */}
-      <div className="flex items-center justify-center gap-2 mt-8 pt-5 border-t border-[var(--revolv-divider)]">
-        <RevolvLogo />
-        <span className="text-xs text-[var(--revolv-gray-light)] font-medium tracking-wide">
-          Relationship Intelligence
-        </span>
-      </div>
-    </GlassCard>
+        {/* Divider */}
+        <div className="flex items-center gap-4 my-6">
+          <div className="flex-1 h-px bg-[var(--revolv-divider)]" />
+          <span className="text-xs text-[var(--revolv-gray-light)] uppercase tracking-wider font-medium">
+            or share your info
+          </span>
+          <div className="flex-1 h-px bg-[var(--revolv-divider)]" />
+        </div>
+
+        {/* Guest contact form */}
+        <form onSubmit={handleGuestSubmit} className="space-y-3">
+          <GlassInput type="text" placeholder="Your name *" value={guestName} onChange={(e) => setGuestName(e.target.value)} required />
+          <GlassInput type="tel" placeholder="Phone number" value={guestPhone} onChange={(e) => setGuestPhone(e.target.value)} />
+          <GlassInput type="email" placeholder="Email address" value={guestEmail} onChange={(e) => setGuestEmail(e.target.value)} />
+
+          {guestError && <p className="text-sm text-red-500 text-center">{guestError}</p>}
+
+          <button
+            type="submit"
+            disabled={guestSubmitting || !guestName.trim()}
+            className="w-full py-3.5 px-6 rounded-2xl border-2 border-[var(--revolv-coral)] text-[var(--revolv-coral)] font-semibold hover:bg-[var(--revolv-coral)] hover:text-white active:scale-[0.98] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {guestSubmitting ? "Sending..." : `Send to ${profileData.firstName}`}
+          </button>
+        </form>
+
+        {/* Revolv badge */}
+        <div className="flex items-center justify-center gap-2 mt-8 pt-5 border-t border-[var(--revolv-divider)]">
+          <RevolvLogo />
+          <span className="text-xs text-[var(--revolv-gray-light)] font-medium tracking-wide">
+            Relationship Intelligence
+          </span>
+        </div>
+      </GlassCard>
+    </div>
   );
 }
 
@@ -372,24 +461,13 @@ function Avatar({
   const ringPad = size === "lg" ? "p-[3px]" : "p-[2px]";
 
   return (
-    <div
-      className={`avatar-ring rounded-full ${ringPad} flex-shrink-0`}
-    >
-      <div
-        className={`${dimensions} rounded-full flex items-center justify-center overflow-hidden bg-white`}
-      >
+    <div className={`avatar-ring rounded-full ${ringPad} flex-shrink-0`}>
+      <div className={`${dimensions} rounded-full flex items-center justify-center overflow-hidden bg-white`}>
         {avatar ? (
-          <img
-            src={avatar}
-            alt="Profile"
-            className="w-full h-full rounded-full object-cover"
-            crossOrigin="anonymous"
-          />
+          <img src={avatar} alt="Profile" className="w-full h-full rounded-full object-cover" crossOrigin="anonymous" />
         ) : (
           <div className="w-full h-full rounded-full bg-gradient-to-br from-[var(--revolv-serenity-3)] to-[var(--revolv-accent)] flex items-center justify-center">
-            <span className={`${textSize} font-bold text-white`}>
-              {initial}
-            </span>
+            <span className={`${textSize} font-bold text-white`}>{initial}</span>
           </div>
         )}
       </div>
@@ -397,15 +475,35 @@ function Avatar({
   );
 }
 
-function StatItem({ label, value }: { label: string; value: string }) {
+function StatItem({ value, label, color }: { value: string; label: string; color: string }) {
   return (
     <div className="text-center">
-      <div className="text-[15px] font-bold text-[var(--revolv-charcoal)]">
+      <div className="text-[18px] font-bold text-[var(--revolv-charcoal)]" style={{ color }}>
         {value}
       </div>
-      <div className="text-xs text-[var(--revolv-gray-light)] mt-0.5">
-        {label}
+      <div className="text-xs text-[var(--revolv-gray-light)] mt-0.5">{label}</div>
+    </div>
+  );
+}
+
+function IntelligenceFeature({
+  icon,
+  label,
+  detail,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  detail: string;
+}) {
+  return (
+    <div className="intelligence-feature rounded-xl px-3 py-3">
+      <div className="flex items-center gap-2 mb-1">
+        <svg className="w-4 h-4 text-[var(--revolv-coral)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+          {icon}
+        </svg>
+        <span className="text-[13px] font-semibold text-[var(--revolv-charcoal)]">{label}</span>
       </div>
+      <span className="text-[11px] text-[var(--revolv-gray-light)] ml-6">{detail}</span>
     </div>
   );
 }
@@ -439,10 +537,7 @@ function RevolvLogo() {
   return (
     <svg width="16" height="16" viewBox="0 0 32 32" fill="none">
       <circle cx="16" cy="16" r="14" fill="var(--revolv-coral)" />
-      <path
-        d="M12 12h8v2h-6v2h4v2h-4v4h-2V12z"
-        fill="white"
-      />
+      <path d="M12 12h8v2h-6v2h4v2h-4v4h-2V12z" fill="white" />
     </svg>
   );
 }
