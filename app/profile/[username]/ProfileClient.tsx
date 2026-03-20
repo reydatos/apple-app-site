@@ -132,11 +132,11 @@ export function ProfileClient({
   // --- Connected state ---
   if (view === "connected") {
     return (
-      <Card>
-        <div className="text-center">
-          <div className="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-4">
+      <GlassCard>
+        <div className="text-center py-4">
+          <div className="w-20 h-20 bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-full flex items-center justify-center mx-auto mb-5">
             <svg
-              className="w-8 h-8 text-green-600"
+              className="w-10 h-10 text-emerald-500"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -149,10 +149,10 @@ export function ProfileClient({
               />
             </svg>
           </div>
-          <h1 className="text-2xl font-bold text-[var(--foreground)] mb-2">
+          <h1 className="text-2xl font-bold text-[var(--revolv-charcoal)] mb-2">
             Connected!
           </h1>
-          <p className="text-[var(--revolv-gray)] mb-6">
+          <p className="text-[var(--revolv-gray)] text-[15px] leading-relaxed mb-6">
             You&apos;re now connected with {profileData.firstName}. Open Revolv
             for the full experience.
           </p>
@@ -160,18 +160,18 @@ export function ProfileClient({
             Opening App Store...
           </p>
         </div>
-      </Card>
+      </GlassCard>
     );
   }
 
   // --- Guest sent confirmation ---
   if (view === "guest-sent") {
     return (
-      <Card>
-        <div className="text-center">
-          <div className="w-16 h-16 bg-[var(--revolv-coral)]/10 rounded-full flex items-center justify-center mx-auto mb-4">
+      <GlassCard>
+        <div className="text-center py-4">
+          <div className="w-20 h-20 bg-gradient-to-br from-[var(--revolv-coral)]/10 to-[var(--revolv-coral)]/20 rounded-full flex items-center justify-center mx-auto mb-5">
             <svg
-              className="w-8 h-8 text-[var(--revolv-coral)]"
+              className="w-10 h-10 text-[var(--revolv-coral)]"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -184,36 +184,40 @@ export function ProfileClient({
               />
             </svg>
           </div>
-          <h1 className="text-2xl font-bold text-[var(--foreground)] mb-2">
+          <h1 className="text-2xl font-bold text-[var(--revolv-charcoal)] mb-2">
             Info Sent!
           </h1>
-          <p className="text-[var(--revolv-gray)]">
+          <p className="text-[var(--revolv-gray)] text-[15px] leading-relaxed">
             {profileData.firstName} will see your contact info in Revolv.
             They&apos;ll be in touch!
           </p>
         </div>
-      </Card>
+      </GlassCard>
     );
   }
 
   // --- Auth options ---
   if (view === "auth") {
     return (
-      <Card>
-        <div className="text-center mb-6">
-          <h2 className="text-2xl font-bold text-[var(--foreground)] mb-2">
-            Connect with {profileData.firstName}
-          </h2>
-          <p className="text-[var(--revolv-gray)]">
-            Sign up to connect and exchange contact info instantly
-          </p>
+      <GlassCard>
+        {/* Mini profile header */}
+        <div className="flex items-center gap-3 mb-6 pb-5 border-b border-[var(--revolv-divider)]">
+          <Avatar avatar={profileData.avatar} initial={initial} size="sm" />
+          <div>
+            <h2 className="text-lg font-semibold text-[var(--revolv-charcoal)]">
+              Connect with {profileData.firstName}
+            </h2>
+            <p className="text-sm text-[var(--revolv-gray)]">
+              Sign up to exchange contact info instantly
+            </p>
+          </div>
         </div>
 
         <div className="space-y-3">
           <button
             onClick={() => handleOAuth("apple")}
             disabled={isConnecting}
-            className="w-full bg-black text-white font-semibold py-4 px-6 rounded-2xl flex items-center justify-center gap-3 hover:bg-gray-800 transition-colors disabled:opacity-50"
+            className="w-full bg-black text-white font-semibold py-4 px-6 rounded-2xl flex items-center justify-center gap-3 hover:bg-gray-800 active:scale-[0.98] transition-all disabled:opacity-50"
           >
             <AppleIcon />
             <span>Continue with Apple</span>
@@ -222,7 +226,7 @@ export function ProfileClient({
           <button
             onClick={() => handleOAuth("linkedin_oidc")}
             disabled={isConnecting}
-            className="w-full bg-[#0A66C2] text-white font-semibold py-4 px-6 rounded-2xl flex items-center justify-center gap-3 hover:bg-[#004182] transition-colors disabled:opacity-50"
+            className="w-full bg-[#0A66C2] text-white font-semibold py-4 px-6 rounded-2xl flex items-center justify-center gap-3 hover:bg-[#004182] active:scale-[0.98] transition-all disabled:opacity-50"
           >
             <LinkedInIcon />
             <span>Continue with LinkedIn</span>
@@ -232,90 +236,90 @@ export function ProfileClient({
         <div className="mt-6 text-center">
           <button
             onClick={() => setView("profile")}
-            className="text-[var(--revolv-gray-light)] hover:text-[var(--revolv-gray)] text-sm transition-colors"
+            className="text-[var(--revolv-accent)] hover:text-[var(--revolv-blue)] text-sm font-medium transition-colors"
           >
             Back
           </button>
         </div>
-      </Card>
+      </GlassCard>
     );
   }
 
-  // --- Main profile card ---
+  // --- Main profile card (iOS-aligned) ---
   return (
-    <Card>
-      {/* Avatar */}
-      <div className="text-center">
-        <div className="w-24 h-24 bg-gradient-to-br from-[var(--revolv-coral)] to-[var(--revolv-coral-dark)] rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
-          {profileData.avatar ? (
-            <img
-              src={profileData.avatar}
-              alt={displayName}
-              className="w-full h-full rounded-full object-cover"
-              crossOrigin="anonymous"
-            />
-          ) : (
-            <span className="text-3xl font-bold text-white">{initial}</span>
+    <GlassCard>
+      {/* Horizontal profile header — matches iOS UnifiedProfileCard layout */}
+      <div className="flex items-start gap-5 mb-5">
+        {/* Avatar (left) — 88px to match iOS Profile.avatarSize */}
+        <Avatar avatar={profileData.avatar} initial={initial} size="lg" />
+
+        {/* Name + details (right) */}
+        <div className="flex-1 min-w-0 pt-1">
+          <h1 className="text-[22px] font-bold text-[var(--revolv-charcoal)] leading-tight truncate">
+            {displayName}
+          </h1>
+          {subtitle && (
+            <p className="text-[15px] text-[var(--revolv-gray)] mt-0.5 leading-snug">
+              {subtitle}
+            </p>
           )}
+          <p className="text-sm text-[var(--revolv-gray-light)] mt-1">
+            @{profileData.username}
+          </p>
         </div>
-
-        <h1 className="text-2xl font-bold text-[var(--foreground)] mb-0.5">
-          {displayName}
-        </h1>
-        {subtitle && (
-          <p className="text-sm text-[var(--revolv-gray)] mb-1">{subtitle}</p>
-        )}
-        <p className="text-sm text-[var(--revolv-gray-light)] mb-6">
-          @{profileData.username}
-        </p>
-
-        <p className="text-[var(--revolv-gray)] text-base leading-relaxed mb-8">
-          {isConnectionRequest
-            ? `Join Revolv to connect with ${profileData.firstName} and exchange contact info instantly`
-            : `Connect with ${profileData.firstName} on Revolv for intelligent networking`}
-        </p>
-
-        {/* Primary CTA */}
-        <button
-          onClick={() => setView("auth")}
-          className="w-full bg-[var(--revolv-coral)] text-white font-semibold py-4 px-6 rounded-2xl shadow-lg hover:bg-[var(--revolv-coral-dark)] transition-all duration-200"
-        >
-          {isConnectionRequest ? "Connect on Revolv" : "Get Revolv"}
-        </button>
       </div>
+
+      {/* Stats row — matches iOS UnifiedProfileCard stats section */}
+      <div className="grid grid-cols-3 gap-1 py-4 border-t border-b border-[var(--revolv-divider)]">
+        <StatItem label="Platform" value="Revolv" />
+        <StatItem label="Networking" value="Smart" />
+        <StatItem label="Intelligence" value="AI" />
+      </div>
+
+      {/* Description */}
+      <p className="text-[var(--revolv-gray)] text-[15px] leading-relaxed mt-5 mb-6">
+        {isConnectionRequest
+          ? `Join Revolv to connect with ${profileData.firstName} and exchange contact info instantly.`
+          : `Connect with ${profileData.firstName} on Revolv for intelligent relationship management.`}
+      </p>
+
+      {/* Primary CTA */}
+      <button
+        onClick={() => setView("auth")}
+        className="w-full bg-[var(--revolv-coral)] text-white font-semibold py-4 px-6 rounded-2xl ios-shadow hover:bg-[var(--revolv-coral-dark)] active:scale-[0.98] transition-all duration-200"
+      >
+        {isConnectionRequest ? "Connect on Revolv" : "Get Revolv"}
+      </button>
 
       {/* Divider */}
       <div className="flex items-center gap-4 my-6">
-        <div className="flex-1 h-px bg-[var(--revolv-bg-base)]" />
-        <span className="text-xs text-[var(--revolv-gray-light)] uppercase tracking-wider">
+        <div className="flex-1 h-px bg-[var(--revolv-divider)]" />
+        <span className="text-xs text-[var(--revolv-gray-light)] uppercase tracking-wider font-medium">
           or share your info
         </span>
-        <div className="flex-1 h-px bg-[var(--revolv-bg-base)]" />
+        <div className="flex-1 h-px bg-[var(--revolv-divider)]" />
       </div>
 
       {/* Guest contact form */}
       <form onSubmit={handleGuestSubmit} className="space-y-3">
-        <input
+        <GlassInput
           type="text"
           placeholder="Your name *"
           value={guestName}
           onChange={(e) => setGuestName(e.target.value)}
           required
-          className="w-full px-4 py-3 rounded-xl border border-[var(--revolv-bg-base)] bg-white text-[var(--foreground)] placeholder-[var(--revolv-gray-light)] focus:outline-none focus:ring-2 focus:ring-[var(--revolv-coral)]/30 focus:border-[var(--revolv-coral)] transition-all"
         />
-        <input
+        <GlassInput
           type="tel"
           placeholder="Phone number"
           value={guestPhone}
           onChange={(e) => setGuestPhone(e.target.value)}
-          className="w-full px-4 py-3 rounded-xl border border-[var(--revolv-bg-base)] bg-white text-[var(--foreground)] placeholder-[var(--revolv-gray-light)] focus:outline-none focus:ring-2 focus:ring-[var(--revolv-coral)]/30 focus:border-[var(--revolv-coral)] transition-all"
         />
-        <input
+        <GlassInput
           type="email"
           placeholder="Email address"
           value={guestEmail}
           onChange={(e) => setGuestEmail(e.target.value)}
-          className="w-full px-4 py-3 rounded-xl border border-[var(--revolv-bg-base)] bg-white text-[var(--foreground)] placeholder-[var(--revolv-gray-light)] focus:outline-none focus:ring-2 focus:ring-[var(--revolv-coral)]/30 focus:border-[var(--revolv-coral)] transition-all"
         />
 
         {guestError && (
@@ -325,7 +329,7 @@ export function ProfileClient({
         <button
           type="submit"
           disabled={guestSubmitting || !guestName.trim()}
-          className="w-full py-3 px-6 rounded-xl border-2 border-[var(--revolv-coral)] text-[var(--revolv-coral)] font-semibold hover:bg-[var(--revolv-coral)] hover:text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full py-3.5 px-6 rounded-2xl border-2 border-[var(--revolv-coral)] text-[var(--revolv-coral)] font-semibold hover:bg-[var(--revolv-coral)] hover:text-white active:scale-[0.98] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {guestSubmitting
             ? "Sending..."
@@ -333,40 +337,113 @@ export function ProfileClient({
         </button>
       </form>
 
-      {/* Feature pills */}
-      <div className="grid grid-cols-3 gap-4 text-center mt-8 pt-6 border-t border-[var(--revolv-bg-base)]">
-        <FeaturePill label="Instant" sublabel="Connections" />
-        <FeaturePill label="Smart" sublabel="Networking" />
-        <FeaturePill label="AI" sublabel="Intelligence" />
+      {/* Revolv badge — minimal branding */}
+      <div className="flex items-center justify-center gap-2 mt-8 pt-5 border-t border-[var(--revolv-divider)]">
+        <RevolvLogo />
+        <span className="text-xs text-[var(--revolv-gray-light)] font-medium tracking-wide">
+          Relationship Intelligence
+        </span>
       </div>
-    </Card>
+    </GlassCard>
   );
 }
 
-// --- Shared components ---
+// --- Shared Components ---
 
-function Card({ children }: { children: React.ReactNode }) {
+function GlassCard({ children }: { children: React.ReactNode }) {
   return (
-    <div className="bg-white rounded-2xl shadow-xl overflow-hidden px-8 py-8">
+    <div className="glass-card rounded-3xl ios-shadow overflow-hidden px-7 py-7">
       {children}
     </div>
   );
 }
 
-function FeaturePill({
-  label,
-  sublabel,
+function Avatar({
+  avatar,
+  initial,
+  size = "lg",
 }: {
-  label: string;
-  sublabel: string;
+  avatar: string | null;
+  initial: string;
+  size?: "sm" | "lg";
 }) {
+  const dimensions = size === "lg" ? "w-[88px] h-[88px]" : "w-11 h-11";
+  const textSize = size === "lg" ? "text-3xl" : "text-lg";
+  const ringPad = size === "lg" ? "p-[3px]" : "p-[2px]";
+
   return (
-    <div>
-      <div className="text-[var(--foreground)] font-semibold text-sm">
+    <div
+      className={`avatar-ring rounded-full ${ringPad} flex-shrink-0`}
+    >
+      <div
+        className={`${dimensions} rounded-full flex items-center justify-center overflow-hidden bg-white`}
+      >
+        {avatar ? (
+          <img
+            src={avatar}
+            alt="Profile"
+            className="w-full h-full rounded-full object-cover"
+            crossOrigin="anonymous"
+          />
+        ) : (
+          <div className="w-full h-full rounded-full bg-gradient-to-br from-[var(--revolv-serenity-3)] to-[var(--revolv-accent)] flex items-center justify-center">
+            <span className={`${textSize} font-bold text-white`}>
+              {initial}
+            </span>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function StatItem({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="text-center">
+      <div className="text-[15px] font-bold text-[var(--revolv-charcoal)]">
+        {value}
+      </div>
+      <div className="text-xs text-[var(--revolv-gray-light)] mt-0.5">
         {label}
       </div>
-      <div className="text-[var(--revolv-gray-light)] text-xs">{sublabel}</div>
     </div>
+  );
+}
+
+function GlassInput({
+  type,
+  placeholder,
+  value,
+  onChange,
+  required,
+}: {
+  type: string;
+  placeholder: string;
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  required?: boolean;
+}) {
+  return (
+    <input
+      type={type}
+      placeholder={placeholder}
+      value={value}
+      onChange={onChange}
+      required={required}
+      className="w-full px-4 py-3.5 rounded-xl bg-white/60 backdrop-blur-sm border border-[var(--revolv-divider)] text-[var(--revolv-charcoal)] placeholder-[var(--revolv-gray-light)] focus:outline-none focus:ring-2 focus:ring-[var(--revolv-accent)]/30 focus:border-[var(--revolv-accent)] transition-all text-[15px]"
+    />
+  );
+}
+
+function RevolvLogo() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 32 32" fill="none">
+      <circle cx="16" cy="16" r="14" fill="var(--revolv-coral)" />
+      <path
+        d="M12 12h8v2h-6v2h4v2h-4v4h-2V12z"
+        fill="white"
+      />
+    </svg>
   );
 }
 

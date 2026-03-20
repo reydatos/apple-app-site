@@ -49,7 +49,7 @@ export default async function ProfilePage({ params, searchParams }: PageProps) {
   const isConnectionRequest = sp.connect === "true";
 
   return (
-    <div className="min-h-screen bg-[var(--background)] flex items-center justify-center px-4 py-12">
+    <div className="min-h-screen serenity-gradient flex items-center justify-center px-4 py-12">
       <div className="max-w-md w-full">
         <ProfileClient
           profileData={profileData}
@@ -60,7 +60,7 @@ export default async function ProfilePage({ params, searchParams }: PageProps) {
           Powered by{" "}
           <a
             href="https://getrevolv.com"
-            className="text-[var(--revolv-blue)] hover:underline"
+            className="text-[var(--revolv-accent)] hover:underline"
           >
             Revolv
           </a>{" "}
